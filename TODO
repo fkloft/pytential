@@ -1,0 +1,16 @@
+- make sysinfo a package
+- implement sysinfo.sys and sysinfo.dbus
+
+	class System:
+		can_daemonize(): bool
+		get_battery_state(): string
+		get_battery_level(): int
+		get_wifi_state(): bool
+		get_bluetooth_state(): bool
+
+- listen on DBus for events
+	- Bluetooth: can't be toggled over DBus, but checked via:
+		org.bluez /org/bluez/hci0 org.bluez.Adapter1 .Powered
+	- Wifi: can be controlled via
+		org.freedesktop.NetworkManager /org/freedesktop/NetworkManager org.freedesktop.NetworkManager .WirelessEnabled
+	- either fallback from DBus to Sys or chain System implementations
