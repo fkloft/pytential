@@ -1,0 +1,16 @@
+# Place this in one of 
+# ~.config/systemd/user/
+# /etc/systemd/user/
+# /usr/lib/systemd/user/
+
+[Unit]
+Description=Pytential - Python Client for Potential
+
+[Service]
+ExecStart=/home/felix/bin/pytential -vud
+Type=simple
+StandardOutput=journal
+
+[Install]
+WantedBy=multi-user.target
+
