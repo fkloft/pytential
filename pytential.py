@@ -73,16 +73,40 @@ class Pytential:
 		self.devices = r.json()["results"]
 		return self.devices
 	
+	def get_device(self, identifier=None):
+		"find device by either passing the objectId or the device_id. For identifier=None (default), return the local device"
+		
+		devices = self.get_devices()
+		
+		if identifier is None:
+			for dev in devices:
+				if ("objectId"  in self.config and dev["objectId" ] == self.config["objectId" ])\
+				or ("device_id" in self.config and dev["device_id"] == self.config["device_id"]):
+					self.config["objectId" ] = dev["objectId" ]
+					self.config["device_id"] = dev["device_id"]
+					self.save_config()
+					return dev
+		else:
+			for dev in devices:
+				if dev["device_id"] == identifier or dev["objectId"] == identifier:
+					return dev
+		
+		return None
+	
+	def assert_local_device(self):
+		"assert that the local device_id and objectId are known"
+		
+		if "objectId"  in self.config and "device_id" in self.config:
+			return
+		self.get_device()
+	
 	def is_registered(self):
-		if not self.devices:
-			self.get_devices()
-		
-		if not "device_id" in self.config:
-			return False
-		
-		return len([True for dev in self.devices if dev["device_id"] == self.config["device_id"]]) > 0
+		return self.get_device() is not None
 	
 	def register(self):
+		if self.is_registered():
+			return None
+		
 		if not "device_id" in self.config:
 			self.config["device_id"] = binascii.hexlify(os.urandom(8)).decode()
 			self.save_config()
@@ -119,25 +143,11 @@ class Pytential:
 			self.save_config()
 		return response
 	
-	def get_object_id(self):
-		if "objectId" in self.config:
-			return self.config["objectId"]
-		
-		if not "device_id" in self.config:
-			return None
-		
-		devices = [dev for dev in self.get_devices() if dev["device_id"] == self.config["device_id"]]
-		if len(devices) == 0:
-			return None
-		
-		dev = devices[0]
-		self.config["objectId"] = dev["objectId"]
-		self.save_config()
-		return dev["objectId"]
-	
 	def update(self):
+		self.assert_local_device()
+		
 		data = {
-			"objectId": self.get_object_id(),
+			"objectId": self.config["objectId"],
 		}
 		data.update(sysinfo.get_power_state())
 		
@@ -145,7 +155,7 @@ class Pytential:
 		assert r.json()["result"]
 		
 		data["low_battery_push_sent"] = False
-		r = self.put('classes/Device/%s' % self.get_object_id(), json=data)
+		r = self.put('classes/Device/%s' % self.config["objectId"], json=data)
 		return r.json()
 	
 	def post(self, url, *args, **kwargs):
