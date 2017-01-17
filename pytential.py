@@ -5,7 +5,7 @@ import binascii
 
 import sysinfo
 
-BASE = "http://192.168.2.13:443/1/"
+BASE = "https://api.parse.com/1/"
 HEADERS = {
 	"X-Parse-Application-Id": "5E2cwyE1QNgn7deCOxAEzqcgm7qOR5s2aPCovrnw",
 	"X-Parse-Client-Key": "NUcPzEslh494ssg1M3zmUzLw3A5vndcbAEeLOb5q",
