@@ -13,7 +13,7 @@ def format_time(timestring):
 	timestamp = dateutil.parser.parse(timestring)
 	timestamp = timestamp.astimezone() # to local timezone
 	
-	return "%s (%s)" % (timestamp.strftime("%Y-%m-%d %H:%M:%S"), ago.human(timestamp, abbreviate=True, precision=1))
+	return "%s - %s" % (timestamp.strftime("%Y-%m-%d %H:%M:%S"), ago.human(timestamp, abbreviate=True, precision=1))
 
 def main():
 	parser = argparse.ArgumentParser()
@@ -72,8 +72,8 @@ def main():
 				d.update(device)
 				d["updatedAtF"] = format_time(d["updatedAt"])
 				
-				d["wifi_f"]      = d["wifi_state"]      and "⌔ \033[2;32mEnabled" or u"\u0338⌔ \033[2;31mDisabled"
-				d["bluetooth_f"] = d["bluetooth_state"] and "ꔪ \033[34mEnabled" or u"\u0338ꔪ \033[33mDisabled"
+				d["wifi_f"]      = d["wifi_state"]      and "\033[2;32m⌔ Enabled" or u"\033[2;31m\u0338⌔ Disabled"
+				d["bluetooth_f"] = d["bluetooth_state"] and "\033[34mꔪ Enabled" or u"\033[33m\u0338ꔪ Disabled"
 				
 				d["state_c"] = "\033[2;33m"
 				if d["state"].lower() in ("charging", "fully charged", "pending charge"):
@@ -85,17 +85,18 @@ def main():
 				d["level_c"] = level_colors[round(d["value"] / 100.0 * (len(level_colors) - 1))]
 				
 				print("""
-  Name:      %(name)s
+  Name:      %(name)-20s\
   Vendor:    %(manufacturer_name)s
+  Type:      %(device_type)-20s\
   Model:     %(model_number)s
-  Type:      %(device_type)s
-  Device ID: %(device_id)s
+  Device ID: %(device_id)-20s\
   Object ID: %(objectId)s
-  Updated:   %(updatedAtF)s
-  Battery:   \033[%(level_c)sm%(value)d%%\033[0m
-  State:     %(state_c)s%(state)s\033[0m
+  Battery:   \033[%(level_c)sm%(value)3d%%\033[0m                \
   Wi-Fi:     %(wifi_f)s\033[0m
-  Bluetooth: %(bluetooth_f)s\033[0m""" % d)
+  State:     %(state_c)s%(state)-20s\033[0m\
+  Bluetooth: %(bluetooth_f)s\033[0m
+  Updated:   %(updatedAtF)s
+  """.rstrip() % d)
 	
 	if args.ring:
 		for dev in args.ring:
