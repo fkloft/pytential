@@ -14,15 +14,16 @@ def main():
 	parser.add_argument("-l", "--list",    action="store_true", help="list devices")
 	parser.add_argument("-d", "--daemon",  action="store_true", help="run daemon")
 	
-	group = parser.add_argument_group(description="Use these options to remotely enable/disable bluetooth or wifi."
+	group = parser.add_argument_group(description="Use these options to remotely enable/disable bluetooth or wifi or to ring a device."
 		+ " Pass either the device_id or objectId (see -l) or the device label, if it is unique."
 		+ " These options can be specified multiple times.")
+	group.add_argument("-r", "--ring",              action="append", metavar="DEV", help="ring device")
 	group.add_argument("-b", "--disable-bluetooth", action="append", metavar="DEV", help="disable bluetooth")
 	group.add_argument("-B", "--enable-bluetooth",  action="append", metavar="DEV", help="enable bluetooth")
 	group.add_argument("-w", "--disable-wifi",      action="append", metavar="DEV", help="disable wifi")
 	group.add_argument("-W", "--enable-wifi",       action="append", metavar="DEV", help="enable wifi")
 	
-	parser.add_argument("-v", "--verbose", action="store_true", help="verbose mode")
+	parser.add_argument("-v", "--verbose", action="store_true", help="verbose, machine-readable mode. each output line can be parsed as JSON")
 	
 	args = parser.parse_args()
 	
@@ -74,6 +75,16 @@ def main():
   State:     %(state)s
   Wi-Fi:     %(wifi_state)s
   Bluetooth: %(bluetooth_state)s""" % d)
+	
+	if args.ring:
+		for dev in args.ring:
+			result = p.ring_device(dev)
+			if args.verbose:
+				print(json.dumps({"status": "remote_control", "device": dev, "feature": "ring", "result": result, }))
+			elif result:
+				print("Ringed device %s" % dev)
+			else:
+				print("Failed to ring on %s" % dev)
 	
 	if args.enable_bluetooth:
 		for dev in args.enable_bluetooth:

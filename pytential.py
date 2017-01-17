@@ -163,31 +163,16 @@ class Pytential:
 		r = self.put('classes/Device/%s' % self.config["objectId"], json=data)
 		return r.json()
 	
-	def remote_control(self, device_id, feature, enable):
-		features = {
-			"BT": "Bluetooth",
-			"WIFI": "WiFi",
-		}
-		feature = feature.upper()
-		if feature not in features:
-			raise ValueError("Unknown feature: %s" % feature)
-		
+	def _remote_push(self, device_id, action, alert, title):
 		device = self.get_device(device_id)
 		if not device:
 			raise ValueError("Unknown device: %s" % device_id)
 		
-		if enable:
-			action = "ON"
-			label = "enabled"
-		else:
-			action = "OFF"
-			label = "disabled"
-		
 		r = self.post('push', json={
 			"data": {
-				"action": "com.paranoidgems.potential.%s_%s" % (feature, action),
-				"alert": "Your %s has been %s." % (features[feature], label),
-				"title": "%s %s" % (features[feature], label),
+				"action": action,
+				"alert": alert,
+				"title": title,
 			},
 			"expiration_interval": 300,
 			"where": {
@@ -196,6 +181,35 @@ class Pytential:
 			}
 		})
 		return r.json()["result"]
+	
+	def ring_device(self, device_id):
+		return self._remote_push(device_id,
+			action="com.paranoidgems.potential.RING_DEVICE",
+			alert="Your device has been found.",
+			title="Ringed your device"
+		)
+	
+	def remote_control(self, device_id, feature, enable=True):
+		features = {
+			"BT": "Bluetooth",
+			"WIFI": "WiFi",
+		}
+		feature = feature.upper()
+		if feature not in features:
+			raise ValueError("Unknown feature: %s" % feature)
+		
+		if enable:
+			action = "ON"
+			label = "enabled"
+		else:
+			action = "OFF"
+			label = "disabled"
+		
+		return self._remote_push(device_id,
+			action="com.paranoidgems.potential.%s_%s" % (feature, action),
+			alert="Your %s has been %s." % (features[feature], label),
+			title="%s %s" % (features[feature], label)
+		)
 	
 	def post(self, url, *args, **kwargs):
 		return post(url, headers={
