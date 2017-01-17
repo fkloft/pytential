@@ -3,9 +3,17 @@
 import argparse
 import getpass
 import json
+import dateutil.parser
+import ago
 
 import pytential
 import upower
+
+def format_time(timestring):
+	timestamp = dateutil.parser.parse(timestring)
+	timestamp = timestamp.astimezone() # to local timezone
+	
+	return "%s (%s)" % (timestamp.strftime("%Y-%m-%d %H:%H:%S"), ago.human(timestamp))
 
 def main():
 	parser = argparse.ArgumentParser()
@@ -62,6 +70,7 @@ def main():
 					"model_number": "<none>",
 				}
 				d.update(device)
+				d["updatedAtF"] = format_time(d["updatedAt"])
 				
 				print("""
   Name:      %(name)s
@@ -70,7 +79,7 @@ def main():
   Type:      %(device_type)s
   Device ID: %(device_id)s
   Object ID: %(objectId)s
-  Updated:   %(updatedAt)s
+  Updated:   %(updatedAtF)s
   Battery:   %(value)d%%
   State:     %(state)s
   Wi-Fi:     %(wifi_state)s
