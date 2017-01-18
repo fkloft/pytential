@@ -14,3 +14,19 @@
 	- Wifi: can be controlled via
 		org.freedesktop.NetworkManager /org/freedesktop/NetworkManager org.freedesktop.NetworkManager .WirelessEnabled
 	- either fallback from DBus to Sys or chain System implementations
+- custom title/alert for remote control
+
+Observed connections, reason not clear yet:
+- GET classes/_User/INSERT_USER_OBJECT_ID
+	Token renewal?
+	receives the user config
+
+- POST classes/_Installation/INSERT_USER_OBJECT_ID
+	POST:
+	{
+		"device_id": "INSERT_DEVICE_ID",
+		"objectId": "INSERT_USER_OBJECT_ID",
+		"username": "INSERT_USERNAME"
+	}
+	receives: device_id, username, updatedAt
+
