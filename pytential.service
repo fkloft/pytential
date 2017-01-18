@@ -9,7 +9,6 @@ Description=Pytential - Python Client for Potential
 [Service]
 ExecStart=/home/felix/bin/pytential -vud
 Type=simple
-StandardOutput=journal
 
 [Install]
 WantedBy=multi-user.target
